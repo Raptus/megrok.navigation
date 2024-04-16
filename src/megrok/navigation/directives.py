@@ -6,7 +6,7 @@ Created on 16-mrt-2010
 import martian
 import grokcore.component
 import grokcore.viewlet
-from interfaces import IMenu, IMenuItem
+from .interfaces import IMenu, IMenuItem
 
 class submenu(martian.Directive):
     scope = martian.CLASS

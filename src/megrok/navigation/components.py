@@ -7,14 +7,14 @@ Created on 13-jan-2010
 
 import grokcore.viewlet, grokcore.component, grokcore.view
 
-from zope.interface import Interface, implements
+from zope.interface import Interface, implementer
 from zope.component import queryMultiAdapter
 from zope.pagetemplate.interfaces import IPageTemplate
 from zope import schema
 from zope.traversing.api import traverse
-from util import createClass
-from urllib import quote_plus
-import directives
+from .util import createClass
+from urllib.parse import quote_plus
+from . import directives
 
 try: 
     from zope.site.hooks import getSite
@@ -27,7 +27,7 @@ try:
 except ImportError:
     pass 
 
-from interfaces import IMenu, IMenuItem
+from .interfaces import IMenu, IMenuItem
 
 
 class BaseMenuOrItem(object):
@@ -45,11 +45,10 @@ class BaseMenuOrItem(object):
             return template()
         return grokcore.view.PageTemplateFile(self._default_template).render(self)
 
-
+@implementer(IMenu)
 class Menu(BaseMenuOrItem, grokcore.viewlet.ViewletManager):
     grokcore.component.baseclass()
-    implements(IMenu)
-    
+
     _default_template = 'menu.pt'
     cssClass=''
     cssItemClass=''
@@ -69,7 +68,7 @@ class Menu(BaseMenuOrItem, grokcore.viewlet.ViewletManager):
             items = groups.pop(group, None)
             if items is not None:
                 self.groups.append({'name':group, 'items':items})
-        self.groups.extend([{'name':group, 'items':items} for group, items in groups.items()])
+        self.groups.extend([{'name':group, 'items':items} for group, items in list(groups.items())])
     
     @property
     def items(self):
@@ -81,9 +80,9 @@ class Menu(BaseMenuOrItem, grokcore.viewlet.ViewletManager):
         return ns
 
 
+@implementer(IMenuItem)
 class MenuItem(BaseMenuOrItem, grokcore.viewlet.Viewlet):
     grokcore.component.baseclass()
-    implements(IMenuItem)
 
     _default_template = 'item.pt'
     _icon=None
@@ -155,7 +154,7 @@ class ContentSubMenu(ContentMenu):
     grokcore.component.baseclass()
     
     def getContent(self):
-        return self.context.values()
+        return list(self.context.values())
             
 class ContentMenuItems(MenuItem):
     grokcore.component.baseclass()
@@ -174,7 +173,7 @@ class ContentMenuItems(MenuItem):
             self.menuitems.append(item) 
     
     def render(self):
-        return u'\n'.join([item.render() for item in self.menuitems])
+        return '\n'.join([item.render() for item in self.menuitems])
             
 class ContentMenuItem(MenuItem):
     grokcore.component.baseclass()

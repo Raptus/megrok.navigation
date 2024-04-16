@@ -43,6 +43,7 @@ Check order in menus using the parentmenu directive
     </ul>  
     </div>
 '''
+from grokcore.component import implementer
 from megrok.navigation.tests import FunctionalLayer
 from zope.testing import doctest
 from megrok import navigation, pagetemplate
@@ -53,9 +54,9 @@ from zope.app.testing.functional import getRootFolder
 class ITestData(Interface):
     pass
 
+@implementer(ITestData)
 class TestData(grok.Model):
-    grok.implements(ITestData)
-
+    pass
 
 class MySite(grok.Container, grok.Application):
     pass
@@ -68,8 +69,8 @@ class IIconMenuItem(navigation.interfaces.IMenuItem):
     pass
 
 
+@implementer(IIconMenu)
 class AlternateViewMenu(navigation.Menu):
-    grok.implements(IIconMenu)
     grok.name('alternateviews-menu')
     navigation.itemsimplement(IIconMenuItem)
     
@@ -87,7 +88,7 @@ class TestDataMenu(navigation.ContentMenu):
     navigation.contentorder(10)
     
     def getContent(self):
-        return getRootFolder()['site'].values()
+        return list(getRootFolder()['site'].values())
 
 class Index(grok.View):
     grok.context(MySite)
